@@ -5,6 +5,146 @@ Read it, re-read it, and make sure you can explain every section out loud withou
 
 ---
 
+## Step 0: Setting up VirtualBox and deploying the project
+
+Before anything Docker-related, you need a Linux VM running on your computer. Here is the full process from zero.
+
+### Install VirtualBox
+
+1. Go to [virtualbox.org](https://www.virtualbox.org) and download the installer for your OS. Install it normally.
+2. Also download and install the **VirtualBox Extension Pack** from the same page — same version as VirtualBox. It adds USB support and better display drivers.
+
+### Download a Debian ISO
+
+Go to [debian.org/distrib](https://www.debian.org/distrib/) and download the latest **stable** netinstall ISO (the small one, ~400 MB). Debian bookworm (12) is what the project uses.
+
+### Create the VM in VirtualBox
+
+1. Open VirtualBox → click **New**
+2. Fill in:
+   - **Name**: Inception (or anything)
+   - **Type**: Linux
+   - **Version**: Debian (64-bit)
+3. **Memory**: at least **2048 MB** (2 GB). Docker needs memory.
+4. **Hard disk**: create a new virtual disk, **20 GB** minimum, VDI format, dynamically allocated.
+5. Click **Create**.
+
+### Configure the VM before first boot
+
+Right-click the VM → **Settings**:
+
+- **System → Processor**: give it at least **2 CPUs**
+- **Storage**: click the empty optical drive, click the disc icon on the right → "Choose a disk file" → select your Debian ISO
+- **Network → Adapter 1**: set to **Bridged Adapter** (so the VM gets an IP on your local network and you can SSH into it from your Mac)
+
+### Install Debian
+
+1. Start the VM. It boots from the ISO.
+2. Choose **Install** (text installer — easier than graphical).
+3. Language: English. Country: your country. Keyboard: your layout.
+4. **Hostname**: `tmarcos` (your 42 login).
+5. **Domain name**: leave blank.
+6. **Root password**: set one you'll remember. Write it down.
+7. **Create a user**: username `tmarcos`, set a password.
+8. **Partition**: use the entire disk, all files in one partition. Confirm and write to disk.
+9. **Software selection**: uncheck everything except **SSH server** and **standard system utilities**. No desktop environment — you won't need one.
+10. **Install GRUB** to the primary drive: yes.
+11. Finish and reboot.
+
+When it asks to remove the installation medium, VirtualBox usually does this automatically. If the VM boots back into the installer, go to VM Settings → Storage and remove the ISO from the optical drive.
+
+### After Debian boots — first setup
+
+Log in as `tmarcos` (your regular user, not root).
+
+**Install sudo and add yourself to the sudo group:**
+```bash
+su -                          # switch to root
+apt-get install -y sudo
+usermod -aG sudo tmarcos
+exit                          # back to tmarcos
+```
+Log out and back in for the group change to take effect.
+
+**Install Docker:**
+```bash
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+**Add yourself to the docker group** (so you don't need sudo for every docker command):
+```bash
+sudo usermod -aG docker tmarcos
+```
+Log out and back in again.
+
+**Verify Docker works:**
+```bash
+docker run hello-world
+```
+You should see "Hello from Docker!".
+
+**Install make and git:**
+```bash
+sudo apt-get install -y make git
+```
+
+### Clone the project
+
+```bash
+cd ~
+git clone https://github.com/TaniaMaraM/Inception.git
+cd Inception
+```
+
+### Set up the environment file
+
+```bash
+cp srcs/.env.example srcs/.env
+```
+
+The `.env.example` already has all the values pre-filled for you. You only need to confirm `DATA_PATH=/home/tmarcos/data` matches your login.
+
+If your login is different from `tmarcos`, edit the file:
+```bash
+nano srcs/.env
+```
+Change every occurrence of `tmarcos` to your actual login.
+
+### Register the domain
+
+```bash
+echo "127.0.0.1 tmarcos.42.fr" | sudo tee -a /etc/hosts
+```
+
+### Launch
+
+```bash
+make
+```
+
+The first run takes a few minutes — it downloads packages and builds all three images. After that:
+
+```bash
+# Open the browser on the VM (if you have a GUI) or use curl:
+curl -k https://tmarcos.42.fr
+
+# Or SSH port-forward from your Mac to access it in your Mac browser:
+# On your Mac terminal:
+ssh -L 8443:localhost:443 tmarcos@<vm-ip>
+# Then open https://localhost:8443 in your Mac browser
+```
+
+To find the VM's IP: run `ip addr show` inside the VM and look for the IP on the bridged interface (usually `enp0s3`).
+
+---
+
 ## The big picture
 
 You built a small web server. Someone types `https://tmarcos.42.fr` in a browser, and they see a WordPress site.
