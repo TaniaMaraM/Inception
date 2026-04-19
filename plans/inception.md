@@ -304,7 +304,6 @@ The evaluator rule: **at least 2 users**, admin username must **not** contain "a
 - First line italicized: `*This project has been created as part of the 42 curriculum by <login>.*`
 - Description section
 - Instructions section
-- Resources section (with AI usage description)
 - Project description section comparing:
   - VM vs Docker
   - Secrets vs Environment Variables

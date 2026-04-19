@@ -15,7 +15,3 @@ RUN chmod +x /tools/entrypoint.sh
 EXPOSE 3306
 
 ENTRYPOINT ["/tools/entrypoint.sh"]
-
-# Each RUN = one new filesystem layer (like a git commit).
-# That's why we chain && rm -rf /var/lib/apt/lists/* — it deletes the
-# apt cache in the same layer so it doesn't bloat the image.

@@ -1,7 +1,7 @@
 -include srcs/.env
 export
 
-COMPOSE = docker-compose -f srcs/docker-compose.yml
+COMPOSE = docker compose -f srcs/docker-compose.yml
 
 all:
 	@mkdir -p $(DATA_PATH)/db $(DATA_PATH)/wordpress
