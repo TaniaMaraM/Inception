@@ -1,0 +1,9 @@
+# Never commit secrets or credentials
+secrets/
+srcs/.env
+
+# Never commit data volumes
+**/data/
+
+# OS noise
+.DS_Store
