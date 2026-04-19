@@ -1,31 +1,34 @@
-# Inception — Everything Tania Needs to Know
+# Inception — Tania's Survival Guide
 
-This document is your personal guide for understanding and defending this project.
-Read it, re-read it, and make sure you can explain every section out loud without looking at it.
+Yes, your husband helped. No, that doesn't matter — because by the time you're defending this,
+you'll know every line of it better than he does. This document is your cheat sheet, your study
+guide, and your pre-battle pep talk. Read it. Read it again. Then close it and explain it out loud
+to the wall. The wall won't judge you. The evaluator might.
 
 ---
 
 ## Step 0: Setting up VirtualBox and deploying the project
 
-Before anything Docker-related, you need a Linux VM running on your computer. Here is the full process from zero.
+Before any Docker magic, you need a Linux VM. Think of it as your project's home — a little
+computer inside your computer, like a dream within a dream. Appropriate for a project called Inception.
 
 ### Install VirtualBox
 
 1. Go to [virtualbox.org](https://www.virtualbox.org) and download the installer for your OS. Install it normally.
-2. Also download and install the **VirtualBox Extension Pack** from the same page — same version as VirtualBox. It adds USB support and better display drivers.
+2. Also download and install the **VirtualBox Extension Pack** from the same page — same version as VirtualBox. It adds USB support and better display drivers. Don't skip it, it'll save you headaches later.
 
 ### Download a Debian ISO
 
-Go to [debian.org/distrib](https://www.debian.org/distrib/) and download the latest **stable** netinstall ISO (the small one, ~400 MB). Debian bookworm (12) is what the project uses.
+Go to [debian.org/distrib](https://www.debian.org/distrib/) and download the latest **stable** netinstall ISO (the small one, ~400 MB). Debian bookworm (12) is what the project uses. Don't grab anything that says "testing" or "unstable" — those words mean what they say.
 
 ### Create the VM in VirtualBox
 
 1. Open VirtualBox → click **New**
 2. Fill in:
-   - **Name**: Inception (or anything)
+   - **Name**: Inception (or anything — this is your VM, name it after your cat if you want)
    - **Type**: Linux
    - **Version**: Debian (64-bit)
-3. **Memory**: at least **2048 MB** (2 GB). Docker needs memory.
+3. **Memory**: at least **2048 MB** (2 GB). Docker is hungry. Feed it.
 4. **Hard disk**: create a new virtual disk, **20 GB** minimum, VDI format, dynamically allocated.
 5. Click **Create**.
 
@@ -35,27 +38,27 @@ Right-click the VM → **Settings**:
 
 - **System → Processor**: give it at least **2 CPUs**
 - **Storage**: click the empty optical drive, click the disc icon on the right → "Choose a disk file" → select your Debian ISO
-- **Network → Adapter 1**: set to **Bridged Adapter** (so the VM gets an IP on your local network and you can SSH into it from your Mac)
+- **Network → Adapter 1**: set to **Bridged Adapter** (so the VM gets an IP on your local network and you can SSH into it from your Mac — no need to stare at a tiny VirtualBox window)
 
 ### Install Debian
 
 1. Start the VM. It boots from the ISO.
-2. Choose **Install** (text installer — easier than graphical).
+2. Choose **Install** (text installer — easier than graphical, and you don't need a pretty UI to install an OS).
 3. Language: English. Country: your country. Keyboard: your layout.
 4. **Hostname**: `tmarcos` (your 42 login).
-5. **Domain name**: leave blank.
-6. **Root password**: set one you'll remember. Write it down.
+5. **Domain name**: leave blank. You don't need one.
+6. **Root password**: set one you'll remember. Write it down. Seriously, write it down.
 7. **Create a user**: username `tmarcos`, set a password.
-8. **Partition**: use the entire disk, all files in one partition. Confirm and write to disk.
-9. **Software selection**: uncheck everything except **SSH server** and **standard system utilities**. No desktop environment — you won't need one.
+8. **Partition**: use the entire disk, all files in one partition. Confirm and write to disk. Yes, it will erase the virtual disk. That's fine — it's a virtual disk.
+9. **Software selection**: uncheck everything except **SSH server** and **standard system utilities**. No desktop environment — you won't need one, and it just wastes space.
 10. **Install GRUB** to the primary drive: yes.
-11. Finish and reboot.
+11. Finish and reboot. Congratulations, you have a Linux server.
 
-When it asks to remove the installation medium, VirtualBox usually does this automatically. If the VM boots back into the installer, go to VM Settings → Storage and remove the ISO from the optical drive.
+When it asks to remove the installation medium, VirtualBox usually does this automatically. If the VM boots back into the installer, go to VM Settings → Storage and remove the ISO from the optical drive. Then reboot again.
 
 ### After Debian boots — first setup
 
-Log in as `tmarcos` (your regular user, not root).
+Log in as `tmarcos` (your regular user, not root — root is for emergencies, not daily driving).
 
 **Install sudo and add yourself to the sudo group:**
 ```bash
@@ -64,9 +67,9 @@ apt-get install -y sudo
 usermod -aG sudo tmarcos
 exit                          # back to tmarcos
 ```
-Log out and back in for the group change to take effect.
+Log out and back in for the group change to take effect. Yes, you have to log out. Linux is not macOS.
 
-**Install Docker:**
+**Install Docker** (copy-paste this whole block — it's the official Docker install for Debian):
 ```bash
 sudo apt-get update
 sudo apt-get install -y ca-certificates curl gnupg
@@ -78,17 +81,17 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-**Add yourself to the docker group** (so you don't need sudo for every docker command):
+**Add yourself to the docker group** (so you don't need sudo for every single docker command):
 ```bash
 sudo usermod -aG docker tmarcos
 ```
-Log out and back in again.
+Log out and back in. Again. Last time, promise.
 
 **Verify Docker works:**
 ```bash
 docker run hello-world
 ```
-You should see "Hello from Docker!".
+You should see "Hello from Docker!". If you do, do a little dance. You earned it.
 
 **Install make and git:**
 ```bash
@@ -109,13 +112,11 @@ cd Inception
 cp srcs/.env.example srcs/.env
 ```
 
-The `.env.example` already has all the values pre-filled for you. You only need to confirm `DATA_PATH=/home/tmarcos/data` matches your login.
-
-If your login is different from `tmarcos`, edit the file:
+The `.env.example` already has all the values pre-filled. You only need to confirm `DATA_PATH=/home/tmarcos/data` matches your login. If your login is something other than `tmarcos`, open the file and fix it:
 ```bash
 nano srcs/.env
 ```
-Change every occurrence of `tmarcos` to your actual login.
+Change every occurrence of `tmarcos` to your actual login. Save with `Ctrl+O`, exit with `Ctrl+X`. Welcome to nano.
 
 ### Register the domain
 
@@ -123,88 +124,88 @@ Change every occurrence of `tmarcos` to your actual login.
 echo "127.0.0.1 tmarcos.42.fr" | sudo tee -a /etc/hosts
 ```
 
+This tells the VM "when someone asks for `tmarcos.42.fr`, it's me." It's like adding yourself to your own contacts.
+
 ### Launch
 
 ```bash
 make
 ```
 
-The first run takes a few minutes — it downloads packages and builds all three images. After that:
+First run takes a few minutes — it downloads packages and builds all three images. Go make a coffee. Come back. It'll be done.
 
 ```bash
-# Open the browser on the VM (if you have a GUI) or use curl:
+# Test with curl inside the VM:
 curl -k https://tmarcos.42.fr
 
-# Or SSH port-forward from your Mac to access it in your Mac browser:
-# On your Mac terminal:
+# Or SSH port-forward from your Mac to see it in your Mac browser:
 ssh -L 8443:localhost:443 tmarcos@<vm-ip>
-# Then open https://localhost:8443 in your Mac browser
+# Then open https://localhost:8443 in Safari/Chrome
 ```
 
-To find the VM's IP: run `ip addr show` inside the VM and look for the IP on the bridged interface (usually `enp0s3`).
+To find the VM's IP address: run `ip addr show` inside the VM and look for the IP on `enp0s3` (it'll look like `192.168.x.x`).
 
 ---
 
 ## The big picture
 
-You built a small web server. Someone types `https://tmarcos.42.fr` in a browser, and they see a WordPress site.
+You built a mini web server. Someone types `https://tmarcos.42.fr` and sees a WordPress site.
+Behind that URL, three programs are running — each minding its own business in its own container:
 
-Behind that URL there are three programs running, each in its own isolated environment:
+1. **NGINX** — the bouncer. Handles TLS (the padlock in the browser), then passes requests inside.
+2. **WordPress (php-fpm)** — the kitchen. Takes the request, runs PHP, asks the database for data, serves the response.
+3. **MariaDB** — the fridge. Stores posts, users, settings. Doesn't talk to the outside world — only WordPress knows it exists.
 
-1. **NGINX** — the front door. Handles TLS (the S in HTTPS), then forwards the request inward.
-2. **WordPress (php-fpm)** — the application. Receives the forwarded request, runs PHP, talks to the database, builds the HTML response.
-3. **MariaDB** — the database. Stores posts, users, settings. Just data, nothing else.
-
-Each program runs in a **container**. A container is not a virtual machine. It is a process on the Linux kernel with its own isolated view of the filesystem, the network, and the process list. Think of it like `chroot` on steroids.
+Each one runs in a **container**. Not a VM — a container. The difference matters, and the evaluator will ask.
 
 ---
 
 ## What is a container — for someone who knows C
 
-When you write a C program and call `fork()`, you get a child process. That child shares the parent's memory until one of them writes (copy-on-write). Now imagine Linux also lets you give the child its own view of:
-- the filesystem (`CLONE_NEWNS` — like `chroot` but stronger)
-- the network (`CLONE_NEWNET` — own interfaces, own routing table)
-- the process IDs (`CLONE_NEWPID` — child sees itself as PID 1)
+You know `fork()`. When you fork, the child gets its own process but shares the parent's memory (copy-on-write). Now imagine Linux also letting you give the child its own isolated view of:
+- the filesystem (`CLONE_NEWNS` — like `chroot` but you can't escape it)
+- the network (`CLONE_NEWNET` — own interfaces, own routing table, no peeking at the host)
+- the process IDs (`CLONE_NEWPID` — child sees itself as PID 1, thinks it owns the machine)
 
-That's what `clone(CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWNET)` does. Docker calls it for you. The container IS a process — it just thinks it is running alone on its own machine.
+That's the syscall: `clone(CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWNET)`. Docker calls it for you. A container is just a process with an identity crisis — it believes it's alone on a machine.
 
-**A Docker image** is a frozen filesystem snapshot (read-only layers). When you start a container, Docker adds a writable layer on top (OverlayFS). Like a git repository: base layers are commits, the running container is your working tree.
+**A Docker image** is a frozen filesystem snapshot (read-only layers stacked via OverlayFS). Like a git repo: each layer is a commit, the running container is your working tree.
 
-**A Dockerfile** is a recipe. Each `RUN` instruction adds a layer. `FROM debian:bookworm` is your base commit. `RUN apt-get install nginx` adds a layer with nginx installed. The final image is all those layers stacked.
+**A Dockerfile** is a recipe. `FROM debian:bookworm` is your base. Each `RUN` adds a layer. The final image is all layers merged into one read-only stack.
 
 ---
 
 ## Why three containers and not one
 
-The project rules say so, but there is also a real reason: each container does one thing. If WordPress crashes, MariaDB keeps running. If you need to update NGINX, you do not touch the database. This is the same reason you write separate C functions instead of one giant `main()`.
+Because the project says so — but also because it makes sense. Each container does one thing. If WordPress crashes, MariaDB keeps running. If you update NGINX, you don't touch the database. It's the same reason you write separate C functions instead of putting everything in `main()` and hoping for the best.
 
-Also: the evaluator will ask you this. Say: "separation of concerns — each service is independently restartable, upgradeable, and replaceable."
+**Say to the evaluator**: "Separation of concerns — each service is independently restartable, upgradeable, and replaceable."
 
 ---
 
 ## The network
 
-All three containers are on a Docker bridge network called `inception`. Think of it as a virtual Ethernet switch that only these containers are plugged into.
+All three containers are connected to a Docker bridge network called `inception`. Think of it as a private virtual Ethernet switch — only these three are plugged in, nobody else can hear them.
 
-Docker runs an internal DNS server. Inside any container on this network, the hostname `mariadb` resolves to the MariaDB container's IP. So WordPress connects to the database with host `mariadb`, not `127.0.0.1`. NGINX forwards PHP requests to `wordpress:9000` — Docker DNS resolves it.
+Docker runs an internal DNS resolver. Inside any container on this network, the hostname `mariadb` resolves to the MariaDB container's private IP. So WordPress connects to the database with `mariadb:3306` — no hardcoded IP addresses, no `/etc/hosts` hacks. NGINX sends PHP requests to `wordpress:9000` the same way.
 
-Nothing outside can reach `mariadb` or `wordpress` directly. Only NGINX has a door to the outside, on port 443.
+From outside the network: you can only reach NGINX on port 443. MariaDB and WordPress are invisible to the outside world. As it should be.
 
 **The evaluator will ask**: "How do containers find each other?"
-**Say**: "Docker's internal DNS. Each service name in docker-compose.yml becomes a resolvable hostname inside the network."
+**You say**: "Docker's internal DNS. Each service name in docker-compose.yml becomes a hostname that resolves inside the network."
 
 ---
 
 ## The volumes
 
-Data needs to survive container restarts. If MariaDB stored everything inside the container's writable layer, all posts and users would disappear when you run `make fclean`.
+If MariaDB kept its data inside the container, everything — every post, every user, every setting — would vanish when you run `make fclean`. That would be sad. Volumes fix this.
 
-Named volumes solve this. The `wp-db` volume is backed by a real directory on the host at `DATA_PATH/db`. When MariaDB writes to `/var/lib/mysql` inside the container, it is actually writing to that host directory. The container can die and come back — the data is on the host disk.
+The `wp-db` volume is backed by a real directory on the host at `DATA_PATH/db`. When MariaDB writes to `/var/lib/mysql` inside the container, it's actually writing to that host directory. The container can die, be deleted, be rebuilt — the data survives on disk.
 
-Same for `wp-files`: WordPress files and uploads live at `DATA_PATH/wordpress` on the host, mounted at `/var/www/html` inside both the WordPress and NGINX containers (NGINX needs them to serve static files directly without going through php-fpm).
+Same story for `wp-files`: WordPress core files and uploads live at `DATA_PATH/wordpress`, mounted at `/var/www/html` inside both WordPress and NGINX (NGINX needs the static files so it can serve images and CSS without bothering php-fpm for every request).
 
 **The evaluator will ask**: "Show me that data persists after a reboot."
-**Do**: `make down`, `sudo reboot`, `make`, open the site — everything is still there.
+**You do**: create a post, `make down`, `sudo reboot`, `make`, open the site — your post is still there. Smile calmly. You knew it would be.
 
 ---
 
@@ -215,7 +216,7 @@ Same for `wp-files`: WordPress files and uploads live at `DATA_PATH/wordpress` o
 ```dockerfile
 FROM debian:bookworm
 ```
-Base image. Must be debian or alpine, penultimate stable. Never `latest`.
+Base image. Must be debian or alpine, penultimate stable. `latest` is forbidden — "latest" is ambiguous and changes under you. Instant fail if you use it.
 
 ```dockerfile
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -225,9 +226,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && mkdir -p /var/lib/mysql /run/mysqld \
     && chown -R mysql:mysql /var/lib/mysql /run/mysqld
 ```
-Install MariaDB. `DEBIAN_FRONTEND=noninteractive` prevents apt from asking questions.
-`rm -rf /var/lib/mysql` — critical: apt runs `mysql_install_db` during install, which seeds `/var/lib/mysql` with initial data. If we leave that in the image, Docker copies it into the volume on first mount and our "first run" detection breaks. We wipe it here and initialize properly in the entrypoint.
-`rm -rf /var/lib/apt/lists/*` — shrinks the image by removing the package index cache.
+Install MariaDB. `DEBIAN_FRONTEND=noninteractive` stops apt from asking "what timezone are you in?" mid-build.
+`rm -rf /var/lib/mysql` is the sneaky one — apt runs `mysql_install_db` during install, which seeds that directory inside the image layer. If we leave it there, Docker will copy it into the volume on first mount and our "has this been initialized?" check breaks silently. We wipe it here and initialize properly in the entrypoint.
+`rm -rf /var/lib/apt/lists/*` — deletes the package index cache to shrink the image. Good hygiene.
 
 ```dockerfile
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -236,7 +237,7 @@ RUN chmod +x /tools/entrypoint.sh
 EXPOSE 3306
 ENTRYPOINT ["/tools/entrypoint.sh"]
 ```
-Copy config and entrypoint. `EXPOSE` is documentation — it does not actually publish the port. `ENTRYPOINT` in JSON array form (exec form) means no shell wrapping — the entrypoint is PID 1 directly.
+`EXPOSE 3306` is documentation only — it does not open any port to the outside. `ENTRYPOINT` in JSON array form (exec form) means no shell wrapper around it — the entrypoint script is launched directly and becomes PID 1.
 
 ### WordPress
 
@@ -250,7 +251,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x /usr/local/bin/wp
 ```
-Install php-fpm and the PHP extensions WordPress needs. `mariadb-client` is installed so the entrypoint can use `mariadb -h mariadb` to wait for the database to be ready. `wp-cli` is a command-line tool that can install and configure WordPress without a browser — we use it in the entrypoint.
+php-fpm is the PHP process manager — it listens on port 9000 and runs PHP files on demand. `mariadb-client` is installed so the entrypoint can ping the database before starting. `wp-cli` is a command-line WordPress installer — it sets up the whole site without needing a browser. Neat.
 
 ### NGINX
 
@@ -262,7 +263,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && mkdir -p /etc/nginx/ssl \
     && rm -f /etc/nginx/sites-enabled/default
 ```
-Install nginx and openssl (for generating the TLS certificate). Remove the default site that comes with the debian nginx package — it would conflict with our config.
+Install nginx and openssl (for the TLS certificate). Remove the default site that Debian's nginx package enables — it listens on port 80 and would conflict with our config. Gone.
 
 ---
 
@@ -272,16 +273,17 @@ Install nginx and openssl (for generating the TLS certificate). Remove the defau
 
 Every entrypoint ends with `exec mysqld`, `exec php-fpm8.2 -F -R`, or `exec nginx -g 'daemon off;'`.
 
-In C terms: the shell script calls `execve()` on the daemon. The daemon **replaces** the shell process. It inherits the same PID — PID 1.
+In C terms: the shell script calls `execve()` on the daemon. The daemon **replaces** the shell process and inherits its PID — which is PID 1.
 
-Why does this matter? When you run `docker stop`, Docker sends `SIGTERM` to PID 1. If PID 1 is the shell and the daemon is a child process, the shell receives `SIGTERM`, exits, and the daemon gets `SIGKILL` with no chance to flush writes to disk. With `exec`, the daemon IS PID 1 and handles `SIGTERM` gracefully.
+Why does this matter? `docker stop` sends `SIGTERM` to PID 1. If the shell is PID 1 and the daemon is a child, the shell gets `SIGTERM`, exits, and the daemon gets `SIGKILL` — no chance to flush data, no clean shutdown, nothing. With `exec`, the daemon IS PID 1 and handles `SIGTERM` like a grown-up.
 
 **The evaluator will ask**: "Why do you use `exec` in your entrypoints?"
-**Say**: "So the daemon becomes PID 1 and can handle SIGTERM gracefully when the container stops."
+**You say**: "So the daemon becomes PID 1 and can handle SIGTERM gracefully when the container stops."
+Then watch them nod approvingly.
 
 ### Why `tail -f` and `sleep infinity` are forbidden
 
-These keep PID 1 alive artificially. The real daemon runs as a child process, and your entrypoint has no way to pass signals to it or know if it crashed. If mysqld dies, the container keeps running because `tail -f` is still alive. The evaluator's `docker stop` sends SIGTERM to `tail`, not to mysqld. No clean shutdown, no crash detection. Instant fail.
+These are lazy hacks to keep PID 1 alive. The real daemon becomes a child process, and if it crashes, the container doesn't notice — `tail -f` is still happily tailing nothing. `docker stop` sends SIGTERM to `tail`, not to the daemon. No clean shutdown. No crash detection. The evaluator will look for this. Don't give them the satisfaction.
 
 ### MariaDB entrypoint — the marker file pattern
 
@@ -290,18 +292,18 @@ MARKER=/var/lib/mysql/.initialized
 if [ ! -f "$MARKER" ]; then
     # First run: initialize
     mysql_install_db ...
-    mysqld --skip-networking &   # temporary instance, no external connections
-    # wait for it to be ready
+    mysqld --skip-networking &   # temporary instance, no outside connections
+    # wait until it's ready
     # run SQL: CREATE DATABASE, CREATE USER, SET ROOT PASSWORD
     touch "$MARKER"
     kill $TEMP_PID
 fi
-exec mysqld --user=mysql        # real instance, PID 1
+exec mysqld --user=mysql        # the real instance, PID 1 from here
 ```
 
-Why the marker file? We can't use `[ ! -d /var/lib/mysql/mysql ]` because the volume is a bind mount — if the host directory is empty, Docker might not seed it from the image. The marker file is explicit: if it exists, we already ran initialization.
+The marker file is a one-time flag — same pattern as creating a `.done` file in C after a first-run setup. We can't just check `[ ! -d /var/lib/mysql/mysql ]` because with a bind-mount volume, Docker doesn't pre-seed the directory from the image. Explicit marker, no surprises.
 
-Why `--skip-networking` for the temporary instance? We don't want the temp mysqld to accept connections from the network while it's being initialized. Only the entrypoint script talks to it via the unix socket.
+`--skip-networking` on the temporary instance: we don't want the temp mysqld to accept connections from other containers while we're initializing it. Only the entrypoint script talks to it via the unix socket.
 
 ### WordPress entrypoint — waiting for MariaDB
 
@@ -312,9 +314,9 @@ until mariadb -h mariadb -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" "${MYSQL_DATAB
 done
 ```
 
-`depends_on: mariadb` in docker-compose.yml only means "start mariadb before wordpress". It does NOT mean "wait until mariadb is ready to accept connections". MariaDB takes a few seconds to initialize. Without this loop, WordPress would try to connect immediately and fail.
+`depends_on: mariadb` in docker-compose.yml means "start mariadb's container before wordpress's container". It does NOT mean "wait until MariaDB is ready to accept connections" — Docker doesn't know or care what happens inside a container after it starts. MariaDB needs a few seconds to initialize. Without this loop, WordPress would crash on startup trying to connect to a database that isn't ready yet. Classic race condition. The loop is the fix.
 
-This is a polling loop — exactly like polling a file descriptor in C: try, sleep, retry.
+It's exactly like polling a file descriptor in C: try, fail gracefully, wait, retry.
 
 ---
 
@@ -323,12 +325,12 @@ This is a polling loop — exactly like polling a file descriptor in C: try, sle
 ```nginx
 listen 443 ssl;
 ```
-Only port 443. There is no `listen 80`. Port 80 cannot be reached. The evaluator will try — it must fail.
+Only port 443. There is no `listen 80`. The evaluator will try to open `http://tmarcos.42.fr` — it must fail completely. If it works, something is wrong.
 
 ```nginx
 ssl_protocols TLSv1.2 TLSv1.3;
 ```
-Only TLS 1.2 and 1.3. TLS 1.0 and 1.1 are disabled by not listing them.
+Only TLS 1.2 and 1.3. Older versions (1.0 and 1.1) are broken and disabled by omission. The evaluator may check this with `curl -v` or a browser's connection info.
 
 ```nginx
 location ~ \.php$ {
@@ -336,69 +338,80 @@ location ~ \.php$ {
     ...
 }
 ```
-Any request for a `.php` file is forwarded to the WordPress container on port 9000 via FastCGI. FastCGI is like a socket protocol: NGINX encodes the request (method, headers, path) into a binary format and sends it over TCP to php-fpm. php-fpm decodes it, runs the PHP file, and sends the response back.
+Any `.php` request gets forwarded to the WordPress container via FastCGI. FastCGI is a binary protocol — NGINX encodes the request details (method, headers, script path) and sends them over TCP to php-fpm on port 9000. php-fpm decodes, runs the PHP file, returns the output. NGINX sends it back to the browser. Simple, elegant, separated.
 
 ---
 
 ## Questions the evaluator WILL ask — with answers
 
+Memorise these. Say them out loud in the shower. Explain them to your plant.
+
 **"Explain how Docker and docker-compose work."**
-Docker uses Linux namespaces and cgroups to run isolated processes. An image is a layered filesystem snapshot. A container is a running instance with its own PID, network, and filesystem namespace. Docker Compose reads a YAML file and runs multiple containers with the right networks, volumes, and environment variables — instead of running `docker run` with a dozen flags for each container.
+Docker uses Linux namespaces and cgroups to run isolated processes. An image is a layered, read-only filesystem snapshot. A container is a running instance with its own PID, network, and filesystem view. Docker Compose reads a YAML file and orchestrates multiple containers with the right networks, volumes, environment variables, and restart policies — instead of typing `docker run` with twenty flags for each service.
 
 **"What is the difference between a Docker image used with and without docker-compose?"**
-The image is the same either way. Docker Compose just automates the `docker run` command with the correct arguments: which network to join, which volumes to mount, which env file to load, what restart policy to apply.
+The image is identical either way. Compose just automates the `docker run` command: which network to join, which volumes to mount, which env file to inject, what restart policy to apply. Convenience wrapper, nothing more.
 
 **"What is the benefit of Docker compared to VMs?"**
-Containers share the host kernel — they start in milliseconds and use almost no extra memory for the OS. A VM boots a full kernel and emulates hardware, which costs seconds and hundreds of megabytes. The tradeoff is that containers share the kernel, so they are less isolated than VMs.
+Containers share the host kernel — millisecond startup, minimal memory overhead. A VM emulates hardware and boots a full kernel — seconds to start, hundreds of MB just for the OS. The tradeoff: containers share the kernel, so they're less isolated than VMs. For this project, the tradeoff is fine — we control all three services.
 
 **"Explain the directory structure of this project."**
-`srcs/` contains the Compose file, the `.env`, and `requirements/` with one subdirectory per service. Each service has a `Dockerfile`, a `conf/` for configuration files, and `tools/` for the entrypoint script. `secrets/` holds plaintext credential files (gitignored). The `Makefile` at the root orchestrates building and running everything.
+`srcs/` has the Compose file, `.env`, and `requirements/` with one folder per service. Each service has a `Dockerfile`, `conf/` for config files, and `tools/` for the entrypoint. `secrets/` holds credential files (gitignored). The `Makefile` at the root orchestrates everything.
 
 **"Explain docker-network."**
-A Docker bridge network is like a virtual Ethernet switch. Containers connected to it get private IP addresses and can reach each other. Docker runs an internal DNS server so containers can resolve each other by service name. Nothing outside the network can reach them unless a port is published with `ports:`.
+A Docker bridge network is a virtual Ethernet switch. Each container on it gets a private IP. Docker's internal DNS lets containers resolve each other by service name — no hardcoded IPs. Nothing outside can reach a container unless it's explicitly published with `ports:`.
 
 **"How do you log into the MariaDB database?"**
 ```bash
 docker exec -it mariadb mariadb -u wpuser -pwpuserpass123 wordpress
 ```
-The evaluator may ask you to do this live and run `SHOW TABLES;` inside.
+Say it confidently. Type it without hesitation. Run `SHOW TABLES;` inside and smile.
 
 **"Why can't the admin username contain 'admin'?"**
-It's a security rule in the evaluation sheet. Using `admin` as a username is the first thing an attacker tries. The project requires a non-obvious username.
+Security. `admin` is the first username any attacker tries. The project enforces a non-obvious username. Ours is `taniawp`.
 
 **"How does NGINX know where WordPress is?"**
-Docker's internal DNS. In the NGINX config, `fastcgi_pass wordpress:9000` uses the service name `wordpress`. Docker resolves `wordpress` to the container's private IP on the `inception` network.
+Docker's internal DNS resolves the service name `wordpress` to the container's IP. `fastcgi_pass wordpress:9000` in the NGINX config uses that name — Docker handles the rest.
 
 **"What happens if one container crashes?"**
-`restart: unless-stopped` in docker-compose.yml tells Docker to restart it automatically. This is like a supervisor process — same reason systemd restarts services.
+`restart: unless-stopped` tells Docker to restart it automatically — like a watchdog process. Same reason systemd has service restart policies.
 
 **"Why do you use `exec` in the entrypoints?"**
-So the daemon becomes PID 1. Docker sends SIGTERM to PID 1 when stopping. If a shell is PID 1 and the daemon is a child, the daemon gets SIGKILL with no clean shutdown. With `exec`, the daemon handles SIGTERM itself.
+So the daemon becomes PID 1 and handles SIGTERM from `docker stop` gracefully. Without `exec`, the daemon is a child process and gets SIGKILL with no clean shutdown.
 
 ---
 
-## Things that cause an instant 0 — make sure none of these are in the code
+## The instant-0 list — tatoo this on your brain
 
-- `tail -f`, `sleep infinity`, or any hack to keep a container alive artificially
-- Passwords or credentials inside any Dockerfile
-- `network: host` or `--link` anywhere
-- Using `latest` as a base image tag
-- No `networks:` section in docker-compose.yml
-- Admin username containing "admin" or "Admin"
-- Using a pre-built image (e.g., `image: wordpress`) instead of a Dockerfile you wrote
+If the evaluator finds any of these, it's over. None of them are in this project, but know why each one is forbidden:
+
+- `tail -f` / `sleep infinity` — fake PID 1, no signal handling, no crash detection
+- Passwords in any Dockerfile — credentials must come from the environment at runtime, never baked into an image
+- `network: host` or `--link` — forbidden by the spec; breaks isolation and portability
+- `image: wordpress` or any pre-built service image — you must write every Dockerfile yourself
+- Base image tagged `latest` — non-deterministic, can change between builds
+- No `networks:` section — containers must be on a named custom network
+- Admin username containing "admin" or "Admin" — security requirement, instant fail
 
 ---
 
-## Live demo checklist for the evaluation day
+## Live demo checklist — the day of the evaluation
 
-- [ ] `make` — all three containers start
-- [ ] `docker ps` — shows all three running
-- [ ] Open `https://tmarcos.42.fr` — WordPress site loads
-- [ ] Open `https://tmarcos.42.fr/wp-admin` — log in as `taniawp`
-- [ ] `docker exec wordpress wp user list --allow-root` — shows taniawp and taniareader
-- [ ] `docker exec -it mariadb mariadb -u wpuser -pwpuserpass123 wordpress` then `SHOW TABLES;`
-- [ ] `http://tmarcos.42.fr` — connection refused
-- [ ] Create a post, run `make down`, run `make all`, post is still there
-- [ ] Run the evaluator's full wipe command, then `make` — everything comes back
+Run through this the night before. Then run through it again in the morning.
 
-You built this. You understand every line. You've got this.
+- [ ] `make` — all three containers start without errors
+- [ ] `docker ps` — shows mariadb, wordpress, nginx all running
+- [ ] Open `https://tmarcos.42.fr` — WordPress site loads (accept the cert warning)
+- [ ] Open `https://tmarcos.42.fr/wp-admin` — log in as `taniawp` / `taniawppass123`
+- [ ] `docker exec wordpress wp user list --allow-root` — shows `taniawp` and `taniareader`
+- [ ] `docker exec -it mariadb mariadb -u wpuser -pwpuserpass123 wordpress` → `SHOW TABLES;` → `EXIT`
+- [ ] `curl http://tmarcos.42.fr` — connection refused (no port 80)
+- [ ] Create a post, `make down`, `make all` — post is still there
+- [ ] Full evaluator wipe, then `make` — everything comes back from scratch
+
+---
+
+You wrote every Dockerfile. You understand every entrypoint. You debugged the MariaDB init.
+You set up a VM from scratch. You did the thing.
+
+Now go get that grade. Your husband is rooting for you — and so is this document.
