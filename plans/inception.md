@@ -248,29 +248,48 @@ Makefile targets:
 
 ---
 
-## Phase 6: Domain setup + end-to-end integration test
+## Phase 6: Local smoke test (Mac)
 
-> **Evaluation section covered**: Simple setup, Persistence
-> **Teaching focus**: What is /etc/hosts? DNS resolution order?
+> **Evaluation section covered**: Simple setup, Persistence (dry run before VM)
+> **Teaching focus**: /etc/hosts, TLS browser warning, Docker file sharing on Mac
 
 ### What to build
 
-On the VM:
-1. Edit `/etc/hosts` to add: `127.0.0.1  login.42.fr`
-2. Full smoke test: open `https://login.42.fr` — should show WordPress
-3. Post a comment, edit a page via the admin dashboard
-4. **Reboot the VM**
-5. Run `make` again
-6. Verify: the comment and edits from before the reboot are still there (volumes persisted)
+On the Mac (for development testing):
+1. Set `LOGIN=augusto.costa` and `DOMAIN_NAME=augusto.42.fr` in `srcs/.env`
+2. Add `/home` to Docker Desktop file sharing: Docker Desktop → Settings → Resources → File Sharing → add `/home`
+3. Edit `/etc/hosts` (Mac): `echo "127.0.0.1 augusto.42.fr" | sudo tee -a /etc/hosts`
+4. `make` — builds all 3 images and starts containers
+5. Open `https://augusto.42.fr` in browser — click through the self-signed cert warning
+6. Log in to WordPress admin at `https://augusto.42.fr/wp-admin` with `taniawp` / `taniawppass123`
+7. Verify second user `taniareader` exists in Users panel
+8. Create a test post, then run `make re` — post survives (volumes not wiped by `re`)
+
+### How to create a WordPress user (evaluator may ask to demo this)
+
+A second user (`taniareader`) is created automatically on first run by the entrypoint. To see it:
+```bash
+docker exec wordpress wp user list --allow-root
+```
+
+To create an additional user manually (via wp-cli in the container):
+```bash
+docker exec wordpress wp user create newuser newuser@example.com \
+  --user_pass=newpass123 --role=subscriber --allow-root
+```
+
+To do it via the admin UI: `https://augusto.42.fr/wp-admin` → Users → Add New.
+
+The evaluator rule: **at least 2 users**, admin username must **not** contain "admin" or "Admin".
 
 ### Acceptance criteria
 
-- [ ] `https://login.42.fr` opens WordPress (not install wizard, not a cert error that won't click through)
-- [ ] `http://login.42.fr` fails to connect
-- [ ] Can log in as admin (non-"admin" username) and edit content
-- [ ] After VM reboot + `make`: all content survives
-- [ ] `docker volume inspect` shows data at `/home/login/data/` on host
-- [ ] Evaluator clean command works: `docker stop $(docker ps -qa); docker rm $(docker ps -qa); docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q); docker network rm $(docker network ls -q) 2>/dev/null` → then `make` → everything comes back
+- [ ] `https://augusto.42.fr` loads WordPress site (no install wizard)
+- [ ] `http://augusto.42.fr` refuses to connect (port 80 not exposed)
+- [ ] `https://augusto.42.fr/wp-admin` logs in as `taniawp` successfully
+- [ ] `docker exec wordpress wp user list --allow-root` shows 2 users
+- [ ] `make fclean` tears everything down; `make` brings it all back
+- [ ] `docker volume inspect inception_wp-db` shows device path at `/home/augusto.costa/data/db`
 
 ---
 
@@ -324,6 +343,53 @@ On the VM:
 - [ ] She can walk through each Dockerfile and explain every line
 - [ ] She can explain why `tail -f` is forbidden
 - [ ] She can explain why no passwords in Dockerfiles
+
+---
+
+## Phase 9: VM deployment
+
+> **Evaluation section covered**: Simple setup, Persistence (for real)
+> **Teaching focus**: This is the final submission environment — everything must work here
+
+### What to build
+
+On the 42 VM (after pushing to git and cloning):
+1. Clone the repo: `git clone <repo> Inception && cd Inception`
+2. Create `srcs/.env` — copy from `.env.example`, set `LOGIN=<her 42 login>` and `DOMAIN_NAME=<login>.42.fr`
+3. Add `/etc/hosts` entry: `echo "127.0.0.1 <login>.42.fr" | sudo tee -a /etc/hosts`
+4. `make` — builds and starts everything
+5. Open `https://<login>.42.fr` in VM browser — click through cert warning
+6. Log in as admin, create a post/comment
+7. `sudo reboot` then `make` — content must survive
+
+### MariaDB login demo (evaluator will watch this)
+```bash
+docker exec -it mariadb mariadb -u wpuser -pwpuserpass123 wordpress
+# Inside MariaDB:
+SHOW TABLES;
+SELECT user, host FROM mysql.user;
+EXIT
+```
+
+### Evaluator's full wipe command (they will run this)
+```bash
+docker stop $(docker ps -qa)
+docker rm $(docker ps -qa)
+docker rmi -f $(docker images -qa)
+docker volume rm $(docker volume ls -q)
+docker network rm $(docker network ls -q) 2>/dev/null
+```
+After this: `make` must rebuild and restore everything from scratch.
+
+### Acceptance criteria
+
+- [ ] `https://<login>.42.fr` loads WordPress on the VM
+- [ ] `http://<login>.42.fr` refused (only 443)
+- [ ] MariaDB login demo works live during evaluation
+- [ ] Data persists after VM reboot
+- [ ] Full wipe + `make re` restores everything
+- [ ] `docker volume inspect` shows data at `/home/<login>/data/` on VM host
+- [ ] She can answer all verbal questions without notes
 
 ---
 

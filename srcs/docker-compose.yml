@@ -41,13 +41,13 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/${LOGIN}/data/db
+      device: ${DATA_PATH}/db
   wp-files:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/${LOGIN}/data/wordpress
+      device: ${DATA_PATH}/wordpress
 
 networks:
   inception:
