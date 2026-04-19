@@ -61,9 +61,9 @@ Edit `srcs/.env` and fill in every variable. Key rules:
 
 **3. Register the domain locally**
 ```bash
-echo "127.0.0.1 login.42.fr" | sudo tee -a /etc/hosts
+echo "127.0.0.1 tmarcos.42.fr" | sudo tee -a /etc/hosts
 ```
-Replace `login.42.fr` with your actual `DOMAIN_NAME`.
+Replace `tmarcos.42.fr` with your actual `DOMAIN_NAME`.
 
 **4. Build and start**
 ```bash

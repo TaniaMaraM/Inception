@@ -31,14 +31,14 @@ make fclean
 make re
 ```
 
-Access the site at `https://login.42.fr` (accept the self-signed certificate warning).
-WordPress admin panel: `https://login.42.fr/wp-admin`
+Access the site at `https://tmarcos.42.fr` (accept the self-signed certificate warning).
+WordPress admin panel: `https://tmarcos.42.fr/wp-admin`
 
 ## Setup
 
 1. Clone the repository inside the VM
 2. Copy `srcs/.env.example` to `srcs/.env` and fill in all values
-3. Add `127.0.0.1 login.42.fr` to `/etc/hosts`
+3. Add `127.0.0.1 tmarcos.42.fr` to `/etc/hosts`
 4. Run `make`
 
 All credentials live in `srcs/.env` (gitignored). Never commit that file.

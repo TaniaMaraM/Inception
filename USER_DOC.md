@@ -4,8 +4,8 @@
 
 Three services accessible through a single HTTPS endpoint:
 
-- **WordPress site** — `https://login.42.fr`
-- **WordPress admin panel** — `https://login.42.fr/wp-admin`
+- **WordPress site** — `https://tmarcos.42.fr`
+- **WordPress admin panel** — `https://tmarcos.42.fr/wp-admin`
 - **MariaDB** — accessible only from inside the Docker network (not from the browser)
 
 The self-signed TLS certificate will trigger a browser warning. Click "Advanced" and proceed — this is expected for a local development setup.
@@ -14,7 +14,7 @@ The self-signed TLS certificate will trigger a browser warning. Click "Advanced"
 
 - Docker and Docker Compose installed
 - The file `srcs/.env` exists and is filled in (copy from `srcs/.env.example`)
-- `/etc/hosts` contains: `127.0.0.1 login.42.fr`
+- `/etc/hosts` contains: `127.0.0.1 tmarcos.42.fr`
 
 ## Starting and stopping
 
@@ -31,9 +31,9 @@ make all
 
 ## Accessing the site
 
-Open `https://login.42.fr` in a browser. Accept the certificate warning.
+Open `https://tmarcos.42.fr` in a browser. Accept the certificate warning.
 
-**Admin panel**: `https://login.42.fr/wp-admin`
+**Admin panel**: `https://tmarcos.42.fr/wp-admin`
 - Username and password are in `srcs/.env` under `WP_ADMIN_USER` and `WP_ADMIN_PASSWORD`
 
 ## Where credentials are stored
