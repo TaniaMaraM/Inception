@@ -3,7 +3,6 @@ set -e
 
 # Generate a self-signed TLS certificate on first run.
 # CN uses DOMAIN_NAME from the .env file so it matches the site URL.
-# The certificate doesn't need to be trusted — the evaluator clicks through
 # the browser warning. What matters is TLSv1.2/1.3 is in use.
 if [ ! -f /etc/nginx/ssl/cert.pem ]; then
     openssl req -x509 -newkey rsa:2048 \
