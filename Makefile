@@ -1,7 +1,8 @@
 -include srcs/.env
 export
 
-COMPOSE = docker compose -f srcs/docker-compose.yml
+NAME    = inception
+COMPOSE = docker compose -f srcs/docker-compose.yml -p $(NAME)
 
 all:
 	@mkdir -p $(DATA_PATH)/db $(DATA_PATH)/wordpress
@@ -10,13 +11,30 @@ all:
 down:
 	$(COMPOSE) down
 
+restart: down all
+
+logs:
+	$(COMPOSE) logs -f
+
+ps:
+	$(COMPOSE) ps
+
 clean:
 	$(COMPOSE) down --volumes --remove-orphans
 
 fclean: clean
 	docker rmi -f $$(docker images -qa) 2>/dev/null || true
+	docker volume rm $$(docker volume ls -q) 2>/dev/null || true
+	docker network rm $$(docker network ls -q) 2>/dev/null || true
 	sudo rm -rf $(DATA_PATH)/db $(DATA_PATH)/wordpress
 
 re: fclean all
 
-.PHONY: all down clean fclean re
+eval:
+	docker stop $$(docker ps -qa) 2>/dev/null || true
+	docker rm $$(docker ps -qa) 2>/dev/null || true
+	docker rmi -f $$(docker images -qa) 2>/dev/null || true
+	docker volume rm $$(docker volume ls -q) 2>/dev/null || true
+	docker network rm $$(docker network ls -q) 2>/dev/null || true
+
+.PHONY: all down restart logs ps clean fclean re eval

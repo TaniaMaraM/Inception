@@ -1,85 +1,110 @@
 # User Documentation — Inception
 
-## What this project runs
+## What This Project Runs
 
-Three services accessible through a single HTTPS endpoint:
+Three services, one HTTPS endpoint:
 
-- **WordPress site** — `https://tmarcos.42.fr`
-- **WordPress admin panel** — `https://tmarcos.42.fr/wp-admin`
-- **MariaDB** — accessible only from inside the Docker network (not from the browser)
+| Service | Role | Accessible From |
+|---------|------|-----------------|
+| **NGINX** | Reverse proxy, TLS termination | Browser via port 443 |
+| **WordPress** | CMS, page rendering (php-fpm) | Via NGINX only |
+| **MariaDB** | Database | Inside Docker network only |
 
-The self-signed TLS certificate will trigger a browser warning. Click "Advanced" and proceed — this is expected for a local development setup.
+> The self-signed TLS certificate will trigger a browser warning — this is expected.
+> Click "Advanced" → "Proceed" to continue.
+
+---
 
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- The file `srcs/.env` exists and is filled in (copy from `srcs/.env.example`)
-- `/etc/hosts` contains: `127.0.0.1 tmarcos.42.fr`
+- `srcs/.env` exists and is filled in (copy from `srcs/.env.example`)
+- `/etc/hosts` contains the line:
+  ```
+  127.0.0.1 tmarcos.42.fr
+  ```
 
-## Starting and stopping
+---
 
-```bash
-# Start the full stack (builds images on first run, may take a few minutes)
-make
+## Makefile Commands
 
-# Stop containers without losing data
-make down
+| Command | What it does |
+|---------|--------------|
+| `make` | Build images and start all services |
+| `make down` | Stop containers (data is preserved) |
+| `make restart` | Stop then start again |
+| `make logs` | Follow live logs from all services |
+| `make ps` | Show running containers and their status |
+| `make clean` | Stop containers and remove volumes |
+| `make fclean` | Full wipe: containers, images, volumes, host data |
+| `make re` | `fclean` + full rebuild from scratch |
+| `make eval` | Nuke all Docker state (run before evaluation) |
 
-# Start again after make down (images already built, fast)
-make all
-```
+---
 
-## Accessing the site
+## Accessing the Site
 
-Open `https://tmarcos.42.fr` in a browser. Accept the certificate warning.
+Once running, open your browser:
 
-**Admin panel**: `https://tmarcos.42.fr/wp-admin`
-- Username and password are in `srcs/.env` under `WP_ADMIN_USER` and `WP_ADMIN_PASSWORD`
+- **Website** — `https://tmarcos.42.fr`
+- **Admin panel** — `https://tmarcos.42.fr/wp-admin`
 
-## Where credentials are stored
+---
 
-All credentials are in `srcs/.env` (this file is gitignored and never committed).
+## Credentials
+
+All credentials live in `srcs/.env` (gitignored, never committed).
 
 | Variable | Purpose |
 |----------|---------|
-| `MYSQL_USER` / `MYSQL_PASSWORD` | WordPress database user |
-| `MYSQL_ROOT_PASSWORD` | MariaDB root password |
-| `WP_ADMIN_USER` / `WP_ADMIN_PASSWORD` | WordPress admin login |
+| `MYSQL_USER` / `MYSQL_PASSWORD` | WordPress DB user |
+| `MYSQL_ROOT_PASSWORD` | MariaDB root |
+| `WP_ADMIN_USER` / `WP_ADMIN_PASSWORD` | WordPress administrator |
 | `WP_USER` / `WP_USER_PASSWORD` | WordPress subscriber account |
 
-## Checking that services are running
+---
+
+## Checking Services
 
 ```bash
-# List running containers
-docker ps
-
-# Follow logs for a specific service
+make ps                        # show all containers and their state
+make logs                      # follow live output from all services
+docker logs -f nginx           # logs for a single service
 docker logs -f wordpress
 docker logs -f mariadb
-docker logs -f nginx
-
-# Check all three are up
-docker compose -f srcs/docker-compose.yml ps
 ```
 
-All three containers should show status `Up`. If one is restarting repeatedly, check its logs.
+All three containers should show status `Up`. If one is restarting, its logs will say why.
 
-## Data persistence
+---
 
-Data is stored on the host at the path set by `DATA_PATH` in `srcs/.env`. It survives container restarts and rebuilds. It is only deleted by `make fclean`.
+## Data Persistence
+
+Data is stored on the host at `DATA_PATH` (set in `srcs/.env`), mounted as bind volumes:
+
+| Volume | Host path | Contains |
+|--------|-----------|----------|
+| `wp-db` | `$DATA_PATH/db` | MariaDB data files |
+| `wp-files` | `$DATA_PATH/wordpress` | WordPress core + uploads |
+
+Data survives `make down` and `make restart`. Only `make fclean` removes it from disk.
 
 ```bash
-# See where volumes are stored on the host
-docker volume inspect inception_wp-db
-docker volume inspect inception_wp-files
+docker volume inspect wp-db     # confirm mount path
+docker volume inspect wp-files
 ```
 
-## Resetting everything
+---
+
+## Resetting
 
 ```bash
-# Full wipe: removes containers, images, volumes, and host data directories
-make fclean
+make fclean   # removes everything: containers, images, volumes, host directories
+make          # rebuild from zero
+```
 
-# Rebuild from scratch
-make
+To reset Docker state before evaluation:
+
+```bash
+make eval
 ```

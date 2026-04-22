@@ -74,18 +74,18 @@ make fclean
 make re
 ```
 
-//ARRUMAR ESSA PARTE
-<!-- Access the site at `https://tmarcos.42.fr` (accept the self-signed certificate warning).
+Access the site at `https://tmarcos.42.fr` (accept the self-signed certificate warning).  
 WordPress admin panel: `https://tmarcos.42.fr/wp-admin`
 
 ## Setup
 
 1. Clone the repository inside the VM
 2. Copy `srcs/.env.example` to `srcs/.env` and fill in all values
-3. Add `127.0.0.1 tmarcos.42.fr` to `/etc/hosts`
-4. Run `make` -->
+3. Create the required secret files in `secrets/` (see `secrets/README.md`)
+4. Add `127.0.0.1 tmarcos.42.fr` to `/etc/hosts`
+5. Run `make`
 
-All credentials live in `srcs/.env` (gitignored). Never commit that file.
+All credentials live in `srcs/.env` and `secrets/` (both gitignored). Never commit those files.
 
 ## Resources
 
