@@ -30,6 +30,9 @@ fclean: clean
 
 re: fclean all
 
+db:
+	docker exec -it inception-mariadb-1 mariadb -u $(MYSQL_USER) -p$(MYSQL_PASSWORD) $(MYSQL_DATABASE)
+
 eval:
 	docker stop $$(docker ps -qa) 2>/dev/null || true
 	docker rm $$(docker ps -qa) 2>/dev/null || true
@@ -37,4 +40,4 @@ eval:
 	docker volume rm $$(docker volume ls -q) 2>/dev/null || true
 	docker network rm $$(docker network ls -q) 2>/dev/null || true
 
-.PHONY: all down restart logs ps clean fclean re eval
+.PHONY: all down restart logs ps clean fclean re eval db

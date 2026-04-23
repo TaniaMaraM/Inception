@@ -5,8 +5,9 @@
 
 ## Table of Contents
 1. [Repository Review](#1-repository-review)
-2. [VM Setup Guide](#2-vm-setup-guide)
-3. [Evaluation Cheatsheet](#3-evaluation-cheatsheet)
+2. [VirtualBox VM Creation (Debian with GUI)](#2-virtualbox-vm-creation-debian-with-gui)
+3. [VM Setup Guide (inside Debian)](#3-vm-setup-guide-inside-debian)
+4. [Evaluation Cheatsheet](#4-evaluation-cheatsheet)
 
 ---
 
@@ -39,7 +40,185 @@
 
 ---
 
-## 2. VM Setup Guide
+## 2. VirtualBox VM Creation (Debian with GUI)
+
+> You already have the Debian ISO downloaded. Follow these steps to create and install the VM in VirtualBox. Do this **at home** before going to 42.
+
+---
+
+### Step 1 — Create the Virtual Machine in VirtualBox
+
+Open VirtualBox and click **New**. Fill in:
+
+| Setting | Value |
+|---------|-------|
+| Name | `Inception` (or any name) |
+| Type | `Linux` |
+| Version | `Debian (64-bit)` |
+| RAM | `4096 MB` (4GB) — minimum 2048MB |
+| CPUs | `2` |
+| Hard Disk | Create a new one → `30 GB` → VDI → Dynamically allocated |
+
+> **Why these specs?** Docker builds images and runs 3 containers. 2GB RAM is the bare minimum — 4GB avoids freezes. 30GB disk ensures you have room for Debian, Docker images, and volumes.
+
+---
+
+### Step 2 — Attach the Debian ISO
+
+1. Select your new VM → click **Settings**
+2. Go to **Storage** → click the empty CD icon under "Controller: IDE"
+3. Click the blue disk icon on the right → **Choose a disk file**
+4. Select your downloaded `debian-12.x.x-amd64-netinst.iso`
+5. Click **OK**
+
+---
+
+### Step 3 — Configure Display (important for GUI)
+
+Still in **Settings**:
+1. Go to **Display**
+2. Set **Video Memory** to `128 MB`
+3. Enable **3D Acceleration** (tick the checkbox)
+4. Click **OK**
+
+---
+
+### Step 4 — Boot and Start the Debian Installer
+
+Click **Start**. The Debian installer loads. Use the **arrow keys** and **Enter** to navigate.
+
+Select: **Graphical install**
+
+> Choose "Graphical install" — it is easier to use than the text installer and gives you a mouse.
+
+---
+
+### Step 5 — Language, Location, Keyboard
+
+| Prompt | Choose |
+|--------|--------|
+| Language | English (safer for terminal commands) |
+| Location | Your country |
+| Keyboard | Your keyboard layout (e.g. Portuguese) |
+
+---
+
+### Step 6 — Hostname and Domain
+
+| Prompt | Value |
+|--------|-------|
+| Hostname | `tmarcos` (your 42 login) |
+| Domain name | Leave blank — just press Continue |
+
+---
+
+### Step 7 — User and Passwords
+
+| Prompt | Value |
+|--------|-------|
+| Root password | Set something memorable (e.g. `tmarcos123`) |
+| Full name | Your name or login |
+| Username | `tmarcos` (your 42 login) |
+| User password | Something memorable |
+
+> Use the same login as your 42 login. The data path in `.env` is `/home/tmarcos/data` — your username must match.
+
+---
+
+### Step 8 — Disk Partitioning
+
+Select: **Guided - use entire disk**  
+Select your virtual disk (the 30GB one you created)  
+Partitioning scheme: **All files in one partition**  
+Select: **Finish partitioning and write changes to disk** → **Yes**
+
+---
+
+### Step 9 — Choose What to Install (Desktop Environment)
+
+When the installer asks **"Software selection"**, you will see a list of checkboxes. Select:
+
+| Option | Tick? |
+|--------|-------|
+| Debian desktop environment | ✅ YES |
+| **Xfce** | ✅ YES — choose this one |
+| GNOME | ❌ NO — too heavy for a VM |
+| KDE Plasma | ❌ NO — too heavy |
+| SSH server | ✅ YES — useful for connecting from host |
+| standard system utilities | ✅ YES |
+
+> **Why XFCE?** It is lightweight (uses ~300MB RAM) and runs smoothly in a VM. GNOME needs 2GB+ just for the desktop and will be very slow inside VirtualBox.
+
+---
+
+### Step 10 — GRUB Bootloader
+
+Select: **Yes** → install GRUB to your primary drive  
+Select the drive `/dev/sda`
+
+The installer finishes and the VM reboots.
+
+---
+
+### Step 11 — First Boot into Debian Desktop
+
+After reboot you will see the XFCE login screen. Log in with your user (`tmarcos` / your password).
+
+**Install VirtualBox Guest Additions** for better display scaling:
+
+```bash
+sudo apt-get install -y virtualbox-guest-x11
+sudo reboot
+```
+
+After this reboot, the screen resizes automatically and you can go fullscreen with `Host+F` (right Ctrl+F).
+
+---
+
+### Step 12 — Install VSCode (for comfortable editing)
+
+Open a terminal inside the VM (right-click desktop → Open Terminal).
+
+```bash
+sudo apt-get install -y wget gpg
+
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/microsoft.gpg > /dev/null
+
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+
+sudo apt-get update && sudo apt-get install -y code
+```
+
+Open VSCode with:
+```bash
+code ~/Inception
+```
+
+You can now edit `.env` by clicking on the file in the VSCode sidebar — no copy-paste issues.
+
+---
+
+### At 42 School — What is Different
+
+At 42 the machines run **Linux** (usually Ubuntu or Fedora). VirtualBox is pre-installed. You do **not** reinstall Debian — you bring your VM or clone your repo fresh into the existing school environment.
+
+**Two scenarios at 42:**
+
+**Scenario A — You bring your VM (recommended)**  
+Export your VM at home (`File → Export Appliance` → saves a `.ova` file), put it on a USB stick or the 42 storage, and import it at school (`File → Import Appliance`).
+
+**Scenario B — Fresh setup on the school machine**  
+The school machine already has VirtualBox and possibly Debian. You:
+1. Start VirtualBox
+2. Create a new Debian VM (same specs as above) or use an existing one
+3. Inside the VM, install Docker (same steps as Section 3 below)
+4. Clone your repo and run it
+
+**On the 42 Linux machine (host), you do NOT need to install anything** — VirtualBox handles everything. All Docker and project work happens inside the VM.
+
+---
+
+## 3. VM Setup Guide (inside Debian)
 
 > All commands run **inside the Debian VM terminal**. You need sudo privileges and internet access on the VM.
 
@@ -248,7 +427,7 @@ Accept the self-signed certificate warning. You should see the WordPress site �
 
 ---
 
-## 3. Evaluation Cheatsheet
+## 4. Evaluation Cheatsheet
 
 ### Critical Rule — Creating .env During Evaluation
 
