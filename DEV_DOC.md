@@ -22,7 +22,7 @@ Host volumes (bind-mounted via local driver):
 Inception/
 ├── Makefile
 ├── srcs/
-│   ├── .env                  (gitignored — copy from .env.example)
+│   ├── .env                  (copy from .env.example)
 │   ├── .env.example
 │   ├── docker-compose.yml
 │   └── requirements/

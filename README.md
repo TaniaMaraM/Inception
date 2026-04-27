@@ -23,11 +23,11 @@ In this project, Docker is appropriate because we control all three services and
 
 ### Secrets vs Environment Variables
 
-An **environment variable** is a key-value pair passed to a process at startup. In Docker Compose, `env_file: .env` injects variables into the container's environment. Any process inside can read them with `getenv("MYSQL_PASSWORD")`. They are convenient but visible to anyone who runs `docker inspect` on the container.
+An **environment variable** is a key-value pair passed to a process at startup. In Docker Compose, `env_file: .env` injects variables into the container's environment. Any process inside can read them. They are convenient but visible to anyone who runs `docker inspect` on the container.
 
 A **secret** is a value stored in a file (typically in a `secrets/` directory, gitignored) and mounted into the container at a controlled path. The process reads the file instead of the environment. This prevents the value from appearing in `docker inspect` output, process listings, or logs.
 
-This project uses `.env` for all credentials. The `secrets/` directory exists as a gitignored holding area for the actual values. In a production environment you would use Docker Swarm secrets or a secrets manager (Vault, AWS Secrets Manager) so credentials never appear in environment variables at all.
+This project uses `.env` for simplicity — secrets were not a requirement.
 
 ---
 
@@ -93,9 +93,11 @@ All credentials live in `srcs/.env` and `secrets/` (both gitignored). Never comm
 
 - **[Docker documentation](https://docs.docker.com/)** — containers, images, volumes, networking
 - **[Docker Compose documentation](https://docs.docker.com/compose/)** — multi-service orchestration
+- **[Docker Compose volumes reference](https://docs.docker.com/reference/compose-file/volumes/#driver_opts)** — `driver_opts` and named volume configuration
 - **[NGINX documentation](https://nginx.org/en/docs/)** — reverse proxy and TLS
 - **[WordPress documentation](https://wordpress.org/support/)** — application behaviour and administration
 - **[MariaDB documentation](https://mariadb.org/documentation/)** — database server configuration
+- **[Debian releases](https://www.debian.org/releases/)** — official list of Debian versions (used as base image)
 
 ### Articles and tutorials
 
