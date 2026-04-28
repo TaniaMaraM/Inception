@@ -609,3 +609,29 @@ docker image inspect mariadb
 # Ver layers de uma image
 docker history mariadb
 ```
+
+
+Forma 1 — Editar manualmente com nano
+
+# 1. Ver qual é o teu utilizador
+whoami
+# 2. Abrir o .env
+nano srcs/.env
+# 3. Localizar a linha:
+DATA_PATH=/home/tmarcos/data
+# 4. Substituir 'tmarcos' pelo teu utilizador (ex: 'user')
+DATA_PATH=/home/user/data
+# 5. Guardar: Ctrl+O → Enter → Ctrl+X
+# 6. Criar a pasta manualmente (opcional, o make faz isto)
+mkdir -p ~/data
+# 7. Correr o projecto
+make
+Forma 2 — Automático com sed (one-liner)
+
+# 1. Substituição automática pelo utilizador actual
+sed -i "s|DATA_PATH=.*|DATA_PATH=/home/$(whoami)/data|" srcs/.env
+# 2. Confirmar que ficou correcto
+grep DATA_PATH srcs/.env
+# 3. Correr o projecto
+make
+A Forma 2 é mais rápida e não requer edição manual. Ambas fazem o mesmo — garantir que DATA_PATH aponta para um directório onde o teu utilizador tem permissão de escrita.
